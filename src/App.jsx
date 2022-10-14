@@ -2,15 +2,17 @@ import { useState } from 'react'
 import styles from './App.module.css'
 import { Header } from './components/Header'
 import { ClipboardText } from 'phosphor-react'
+import { nanoid } from 'nanoid'
 
 import './global.css'
 import { Task } from './components/Task'
 import { render } from 'react-dom'
 
 export function App() {
-  const [tasks, setTasks] = useState([{taskDesc: "Lorem lorem lorem lorem lorem lorem", isComplete: false}])
+  const [tasks, setTasks] = useState([{}])
   const [newTask, setNewTask] = useState('')
-  const [createdTaskCount, setCreatedTaskCount] = useState(1)
+  const [createdTaskCount, setCreatedTaskCount] = useState(0)
+  const [completedTaskCount, setCompletedTaskCount] = useState(0)
 
   function handleNewTaskChange(event) {
     setNewTask(event.target.value)
@@ -18,24 +20,25 @@ export function App() {
 
   function handleCreateNewTask(event, taskDesc) {
     event.preventDefault()
-    setTasks(prevTasks => {return([...prevTasks, {taskDesc: newTask, isComplete: false}])})
+    setTasks(prevTasks => {return(createdTaskCount > 0 ? [...prevTasks, {id: nanoid(), taskDesc: newTask, isComplete: false}] : [{id: nanoid(), taskDesc: newTask, isComplete: false}])})
     setCreatedTaskCount(createdTaskCount + 1)
     setNewTask('')
   }
 
-  function handleDeleteTask(taskDesc) {
-    const tasksWithoutDeleted = tasks.filter(task => task.taskDesc !== taskDesc)
+  function handleDeleteTask(id) {
+    const tasksWithoutDeleted = tasks.filter(task => task.id !== id)
     setCreatedTaskCount(createdTaskCount - 1)
     setTasks(tasksWithoutDeleted)
   }
 
-  function handleCheckboxClick(taskDesc) {
+  function handleCheckboxClick(id) {
     setTasks(tasks.map(task => {
-        return(taskDesc === task.taskDesc ? {
+        return(id === task.id ? {
           ...task,
           isComplete: true
         } : task)
       }))
+    setCompletedTaskCount(completedTaskCount + 1)
   }
 
   function renderTask() {
@@ -51,9 +54,7 @@ export function App() {
       return(
         tasks.map(task => {
           return(
-            <div className={styles.tasks}>
-              <Task key={task.taskDesc} taskDesc={task.taskDesc} taskComplete={task.isComplete} handleDeleteTask={handleDeleteTask} handleCheckboxClick={handleCheckboxClick}/>
-            </div>
+              <Task key={task.id} id={task.id} taskDesc={task.taskDesc} taskComplete={task.isComplete} handleDeleteTask={handleDeleteTask} handleCheckboxClick={handleCheckboxClick}/>
           )
         }
         )
@@ -76,9 +77,11 @@ export function App() {
         <div className={styles.taskWrapper}>
           <header>
             <p>Tarefas Criadas <span>{createdTaskCount}</span></p>
-            <p>Concluidas <span>0</span></p>
+            <p>Concluidas <span>{completedTaskCount} de {createdTaskCount}</span></p>
           </header>
-          {renderTask()}
+          <div className={styles.tasks}>
+            {renderTask()}
+          </div>
         </div>
       </div>
     </>

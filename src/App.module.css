@@ -65,7 +65,7 @@
 
 .taskWrapper header p span {
   color: var(--gray-200);
-  font-size: 1rem;
+  font-size: .75rem;
   padding: .2rem .4rem;
 
   background: var(--gray-400);
